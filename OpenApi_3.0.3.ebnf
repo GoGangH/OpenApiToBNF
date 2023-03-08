@@ -1,0 +1,78 @@
+#Format
+## OpenAPI 사양을 준수하는 OpenAPI 문서는 그 자체로 JSON 또는 YAML 형식으로 표시될 수 있는 JSON 개체입니다.
+OpenApiDocFormat := "JSON" | "YAML"
+OpenApiObjectType := "JSON"
+
+#OpenApi Document Object
+OpenApiDocObj := OpenApiField InfoField PathsField [ servers components security tags externalDocs ]
+
+##1. Path Templating
+
+##2. Media Types
+
+##3. HTTP Status Codes
+
+#dataType schema
+OSASchema := SchemaType SchemaFormat
+SchemaType := "integer" | "number" | "string" | "boolean"
+SchemaFormat := IntFormat | NumFormat | StrFormat | "boolean"
+IntFormat := "int32" | "int64"
+NumFormat := "float" | "double"
+StrFormat := "string" | "binary" | "data" | "date-time" | "password"
+
+
+
+# OpenAPI 문서는 하나 이상의 경로 필드, 구성요소 필드 또는 웹후크 필드를 포함해야 합니다.
+openApiDoc :=  pathsField ( componentsField | webhooksField )
+
+#경로 템플릿은 중괄호({})로 구분된 템플릿 표현식을 사용하여 URL 경로의 섹션을 경로 매개변수를 사용하여 교체 가능하도록 표시하는 것을 말합니다.
+PathTemplatingDef := "URL"
+
+#경로의 각 템플릿 표현식은 경로 항목 자체 및/또는 각 경로 항목의 작업 에 포함된 경로 매개변수에 해당해야 합니다 . 예외는 예를 들어 ACL 제약 조건으로 인해 경로 항목이 비어 있는 경우 일치하는 경로 매개 변수가 필요하지 않다는 것입니다.
+
+
+#이러한 경로 매개변수의 값에는 RFC3986 에서 설명하는 이스케이프 처리되지 않은 "일반 구문" 문자 (슬래시( /), 물음표( ?) 또는 해시( #))가 포함되어서는 안 됩니다(MUST NOT).
+#param 매개변수
+PathParam := '!' ( "/" ( "?" | "#" ) )
+
+#OpenAPI 사양을 준수하는 OpenAPI 문서는 그 자체로 JSON 또는 YAML 형식으로 표시될 수 있는 JSON 개체입니다.
+OpenApiDocFormat := "JSON" | "YAML"
+
+#루트 OpenAPI 문서의 이름을 openapi.json또는 로 지정하는 것이 좋습니다 openapi.yaml.
+RootOpenAPIDocName := [ openapi.json | openapi.yaml ]
+
+#JSON Schema Validation 어휘 에 정의된 대로 데이터 유형은 선택적 수정자 속성을 가질 수 있습니다 format. OAS는 기본 데이터 유형에 대한 세부 정보를 제공하기 위해 추가 형식을 정의합니다.
+#OAS에서 정의한 형식은 다음과 같습니다.
+OASFormatsDef := "int32" "int64" "float" "double" "password"
+
+OpenAPIObject := FieldNameList 
+
+Field := ( openapi info ) [ jsonSchemaDialect, server, paths, webhooks, components, security, tags, externalDocs ]
+
+Info := InfoObject 
+InfoObject := title version [ summary description termsOfService contact license ]
+
+DocStructure :=
+
+OpenApiDocOBJ :=
+
+FieldName := 
+
+
+
+ex)
+TypesDef := RecordTypeDef*
+RecordTypeDef := Annotation* "record" Name "{" RecordDef* "}"
+RecordDef := FieldDef | EnumDef
+FieldDef := Annotation* Type Name ";"
+EnumDef := "enum" "{" FieldDef* "}"
+Type := PrimitiveType | RecordType | ArrayType | TypeRef
+PrimitiveType := "string" | "int" | "long" | "double" | "decimal"
+RecordType := "record" "{" RecordDef* "}"
+ArrayType := "array" "<" Type ">"
+Annotation := "@" Name [ "(" NameValueList ")" ]
+NameValueList := NameValue ( "," NameValue)*
+NameValue := Name "=" Value
+Name := <IDENT>
+TypeRef := <IDENT>
+Value := <STRING> | <NUMBER>
