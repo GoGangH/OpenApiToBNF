@@ -23,3 +23,14 @@ info:
 title:
 version
 f
+
+# 참고자료 URL
+https://editor.swagger.io/
+
+
+https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#schemaObject
+
+
+https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form
+
+https://wwwi.tistory.com/78
