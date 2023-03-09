@@ -1,62 +1,117 @@
-#Format
-## OpenAPI 사양을 준수하는 OpenAPI 문서는 그 자체로 JSON 또는 YAML 형식으로 표시될 수 있는 JSON 개체입니다.
-OpenApiDocFormat := "JSON" | "YAML"
-OpenApiObjType := "JSON"
+#OpenApi Spec 3.0.3 to EBNF
+OpenApiDocFormat ::= "JSON" | "YAML"
+OpenAPIDocFields ::= OpenAPIVersion Info [ Servers ] Paths [ Components SecurityRequirement Tags ExternalDocs ]
 
-#OAS dataType
-OASType := Integer | Number | String | Boolean
+Info ::= Title [ Description TermsOfService Contact License ] Version
+Servers ::= Url [ Description Variable ]
+Paths ::= ( "/{path}" )*
 
-Integer := "int32" | "int64"
-Number := "float" | "double"
-String := "string" | "binary" | "data" | "date-time" | "password"
+#Components ::= ( <STRING> ComponentList )<MAP>
+#ComponentList ::= [ Schema Responses Parameters Examples RequestBodies Headers SecuritySchemes Links Callbacks ]
+Components ::= [ ReusableSchemas ReusableResponses ReusableParameters ReusableExamples ReusableRequestBodies ReusableHeaders ReusableSecuritySchemes ReusableLinks ReusableCallbacks ] #?????
+SecurityRequirement ::= "{Name}" #"oauth2" | "openIdConnect" | <EMPTY>
+Tags ::= { Name [ Description ExternalDocs ] }
+ExternalDocs ::= Description? Url
 
-#OpenApi Document Object
-OpenApiDocObj := OpenApiField InfoField PathsField [ ServersField ComponentsField SecurityField TagsField ExternalDocsField ]
-
-OpenApiField := <STRING> "=" "OpenAPI Specification version"
-InfoField := InfoFieldObj "=" "Provides metadata about the API"
-PathsField := "/{path}" PathItemObj
-ServersField := "url" [ "description" ServersMap ]
-ComponentsField := [ schemas responses parameters examples requestBodies headers securitySchemes links callbacks ]
-SecurityField := "{}" | SecurityObj #
-TagsField := TagsObj #
-ExternalDocsField := externalDocsObj #
-
-PathItemObj := [ "$ref" "summary" "description" OperationList ServersField Parameters ]
-
-ServersMap := Map["string", ServersVariables]
-ServersVariables := "enum" [ "default" ] "description"
-
-InfoFieldObj := "title" [ "description" "termsOfService" ContactObj LicenseObj ] "version"
-ReferenceObj := "$ref"
-OperationObj := [ "tags" "summary" "description" externalDocs "operationId" parameters requestBody ] responses [ callbacks "deprecated" security servers ] #
-externalDocsObj := "url" [ "description" ]
-ParamObj := "name" in [ "description" ] "required" [ "deprecated" "allowEmptyValue" ] #
-ContactObj := [ "name" "url" "email" ]
-LicenseObj := "name" [ "url" ]
-
-in := "query" | "header" | "path" | "cookie"
-
-OperationList := "get" | "put" | "post" | "delete" | "options" | "head" | "patch" | "trace"
-Parameters := ParamObj ReferenceObj
+ReusableSchemas ::= ( <STRING> Schema )<MAP>
+ReusableResponses ::= ( <STRING> Responses )<MAP>
+ReusableParameters ::= ( <STRING> Parameters )<MAP>
+ReusableExamples ::= Example
+ReusableRequestBodies ::= 
+ReusableHeaders ::= 
+ReusableSecuritySchemes ::= 
+ReusableLinks ::= 
+ReusableCallbacks ::= 
 
 
+Variable ::= { ( <STRING> VariableObj )<MAP> }
+Callbacks ::= ( <STRING> (CallbackObj | ReferenceObj) )<MAP>
+Links ::= ( <STRING> (LinkObj | ReferenceObj) )<MAP>
+ComponentsSchemas ::= ( <STRING> (SchemaObj | ReferenceObj) )<MAP>
+Content ::= ( <STRING> MediaType )<MAP>
+Examples ::= (<STRING> (ExampleObj | ReferenceObj) )<MAP>
+Encoding ::= ( <STRING> EncodingObj )<MAP>  
+Headers ::= ( <STRING> (HeaderObj | ReferenceObj) )<MAP>
+Mapping ::= ( <STRING> <STRING> )<MAP>
+RequestBody ::= RequestBodyObj | ReferenceObj
+Parameters ::= ParametersObj | ReferenceObj
+Schema ::= SchemaObj | ReferenceObj
+Responses ::= ResponseObj | ReferenceObj #더 알아볼것
+<STRING> ":=" MediaType ## 
+
+Get Put Post Delete Options Head Patch Trace := OperationObj #?? 가능한가 ?
+Paths := OperationObj | Servers | Parameters
+
+Paths := 
+Paths:  pathObject
+pathObject := 
+    "/{}"
+
+"/{"path = <IDENT> ::= [ "$ref" Summary Description Get Put Post Delete Options Head Patch Trace Servers Parameters ]
+Contact ::= [ Name Url email ]
+License ::= Name Url?
+VariableObj ::= [ Enum Default ] Description
+OperationObj ::= [ TagsForAPIDocControl Summary Description ExternalDocs OperationId Parameters RequestBody ] Responses [ Callbacks Deprecated SecurityRequirement Servers ]
+CallbackObj #이것도 정리 필요
+ParametersObj ::= Name locationOfParameter [ Description Required Deprecated AllowEmptyValue ] # Allow부분 재정의 필요 #이부분 제대로 파악 필요
+ReferenceObj ::= "$ref"
+RequestBodyObj ::= Description? Content Required?
+ResponseObj ::= Description [ Headers Content Links ]
+LinkObj ::= [ OperationRef OperationId LinkParameters LinkRequestBody Description Servers]
+
+LinkParameters ::= ( <STRING> (<ANY> | "{expression}") )<MAP>
+LinkRequestBody ::= <ANY> | "{expression}"
+
+SecurityScheme ::= SecurityType Description? Name LocationOfAPIKey NameOfTheHTTPAuthorizationScheme BearerFormat? OAuthFlows OpenIdConnectUrl #다시볼것
+
+MediaType ::= [ Schema Example Examples Encoding ]
+
+SchemaObj ::= [ Nullable Discriminator ReadOnly WriteOnly Xml ExternalDocs Example Deprecated ]
+ExampleObj ::= [ Summary Description Value ExternalValue ]
+EncodingObj ::= [ ContentType Headers Style Explode AllowReserved ]
+HeaderObj ::= [ Description Required Deprecated AllowEmptyValue ] #확실히 다시봐야할것
+
+Discriminator ::= PropertyName Mapping?
+
+Xml ::= [Name NameSpace Prefix Attribate Wrapped]
+
+OAuthFlows ::= implicit #??????????????????????????
+
+Path ::= { "/" Name }
+Paths ::= 
+
+
+#Type
+OpenAPIVersion ::= <STRING>
+Title ::= <STRING>
+Description ::= <STRING>
+TermsOfService ::= Url
+Name ::= <STRING>
+Url ::= <STRING>
+Email ::= <STRING>
+Enum ::= <ARRAY>
+"$ref" ::= <STRING>
+Summary ::= <STRING>
+TagsForAPIDocControl ::= <STRING>
+ContentType ::= <STRING>
+Style ::=
+Explode ::= <BOOLEAN>
+AllowReserved ::= <BOOLEAN>
+LocationOfParameter ::= "query" | "header" | "path" | "cookie" #In
+LocationOfAPIKey ::= "query" | "header" | "cookie" #In
+Required ::= <BOOLEAN>
+Deprecated ::= <BOOLEAN>
+AllowEmptyValue
+OperationId
+Example ::= <ANY>
+ReadOnly ::= <BOOLEAN>
+WriteOnly ::= <BOOLEAN>
+propertyName ::= <STRING>
+SecurityType  ::= "apiKey" | "http" | "oauth2" | "openIdConnect" #Type
+OpenIdConnectUrl ::= Url
 
 
 
-ex)
-TypesDef := RecordTypeDef*
-RecordTypeDef := Annotation* "record" Name "{" RecordDef* "}"
-RecordDef := FieldDef | EnumDef
-FieldDef := Annotation* Type Name ";"
-EnumDef := "enum" "{" FieldDef* "}"
-Type := PrimitiveType | RecordType | ArrayType | TypeRef
-PrimitiveType := "string" | "int" | "long" | "double" | "decimal"
-RecordType := "record" "{" RecordDef* "}"
-ArrayType := "array" "<" Type ">"
-Annotation := "@" Name [ "(" NameValueList ")" ]
-NameValueList := NameValue ( "," NameValue)*
-NameValue := Name "=" Value
-Name := <IDENT>
-TypeRef := <IDENT>
-Value := <STRING> | <NUMBER>
+
+#<BNF> [] : 있을수도 없을수도, () : 묶음, {} : 반복, 
+#<궁금한 점>  * :  , ?   ? :  , "" :  , '' :  ,type과 설명을 적는 방법
