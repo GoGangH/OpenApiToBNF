@@ -1,117 +1,171 @@
 #OpenApi Spec 3.0.3 to EBNF
-OpenApiDocFormat ::= "JSON" | "YAML"
-OpenAPIDocFields ::= OpenAPIVersion Info [ Servers ] Paths [ Components SecurityRequirement Tags ExternalDocs ]
+#OpenApi Docs Url : https://spec.openapis.org/oas/v3.0.3#relative-references-in-urls
+# Docs Page : 4.7.1
+OpenApiDocFormat := "JSON" | "YAML"
+OpenAPIDocFields := OpenAPIVersion Info [Servers] Paths [Components SecurityRequirement Tags ExternalDocs]
+# Field name : openapi
+OpenAPIVersion := <STRING>
 
-Info ::= Title [ Description TermsOfService Contact License ] Version
-Servers ::= Url [ Description Variable ]
-Paths ::= ( "/{path}" )*
+# 4.7.2 info
+Info := InfoObj
+InfoObj := Title [ Description TermsOfService Contact License ] Version
+Title := <STRING>
+Description := <STRING>
+TermsOfService := <STRING>
+Contact := ContactObj 
+License := LicenseObj
+Version := <STRING>
+ContactObj := [Name Url Email] # 4.7.3 Contact Object
+LicenseObj := Name Url? # 4.7.4 License Object
+Name := <STRING>
+Url := <STRING>
+Email := <STRING>
 
-#Components ::= ( <STRING> ComponentList )<MAP>
-#ComponentList ::= [ Schema Responses Parameters Examples RequestBodies Headers SecuritySchemes Links Callbacks ]
-Components ::= [ ReusableSchemas ReusableResponses ReusableParameters ReusableExamples ReusableRequestBodies ReusableHeaders ReusableSecuritySchemes ReusableLinks ReusableCallbacks ] #?????
-SecurityRequirement ::= "{Name}" #"oauth2" | "openIdConnect" | <EMPTY>
-Tags ::= { Name [ Description ExternalDocs ] }
-ExternalDocs ::= Description? Url
+# 4.7.5 Servers
+Servers := ServerObj
+ServerObj := Url [Description Variable]
 
-ReusableSchemas ::= ( <STRING> Schema )<MAP>
-ReusableResponses ::= ( <STRING> Responses )<MAP>
-ReusableParameters ::= ( <STRING> Parameters )<MAP>
-ReusableExamples ::= Example
-ReusableRequestBodies ::= 
-ReusableHeaders ::= 
-ReusableSecuritySchemes ::= 
-ReusableLinks ::= 
-ReusableCallbacks ::= 
+# 4.7.6 Server Variable Object
+Variable := ServerVariableObj
+ServerVariableObj := Enum? Default Description?
+Enum := "array" <STRING>
+Default : <STRING>
 
+# 4.7.8 paths
+Paths := PathsObject*
+PathsObject := ("/"<IDENT>) PathItemObject 
+PathItemObject :=  ["$ref" Summary Description Get Put Post Delete Options Head Patch Trace PathServers Parameters] # 4.7.9 Path Item Object
+"$ref" := <STRING>
+Summary := <STRING>
+Get := OperationObject
+Put := OperationObject
+Post := OperationObject
+Delete := OperationObject
+Options := OperationObject
+Head := OperationObject
+Patch := OperationObject
+Trace  := OperationObject
+PathServers := ServerObj*
+Parameters := ParameterObj | ReferenceObj
+SchemaObj := [Nullable Discriminator ReadOnly WriteOnly Xml ExternalDocs Example Deprecated] #4.7.24 Schema Object 
 
-Variable ::= { ( <STRING> VariableObj )<MAP> }
-Callbacks ::= ( <STRING> (CallbackObj | ReferenceObj) )<MAP>
-Links ::= ( <STRING> (LinkObj | ReferenceObj) )<MAP>
-ComponentsSchemas ::= ( <STRING> (SchemaObj | ReferenceObj) )<MAP>
-Content ::= ( <STRING> MediaType )<MAP>
-Examples ::= (<STRING> (ExampleObj | ReferenceObj) )<MAP>
-Encoding ::= ( <STRING> EncodingObj )<MAP>  
-Headers ::= ( <STRING> (HeaderObj | ReferenceObj) )<MAP>
-Mapping ::= ( <STRING> <STRING> )<MAP>
-RequestBody ::= RequestBodyObj | ReferenceObj
-Parameters ::= ParametersObj | ReferenceObj
-Schema ::= SchemaObj | ReferenceObj
-Responses ::= ResponseObj | ReferenceObj #더 알아볼것
-<STRING> ":=" MediaType ## 
+# 4.7.10 Operation Object
+OperationObject := [OperationTags Summary Description ExternalDocs OperationId Parameters RequestBody] Responses [Callbacks Deprecated Security Servers]
+# 4.7.12 Parameter Object
+ParameterObj := Name locationOfParameter [Description Required Deprecated AllowEmptyValue Style Explode AllowReserved Schema Example Examples]
+ReferenceObj := "$ref" # 4.7.23 Reference Object
+OperationTags := "array" <STRING>
+ExternalDocs := ExternalDocsObj # 4.7.11 External Documentation Object
+ExternalDocsObj := Description? Url
+OperationId := <STRING>
 
-Get Put Post Delete Options Head Patch Trace := OperationObj #?? 가능한가 ?
-Paths := OperationObj | Servers | Parameters
+LocationOfParameter := "query" | "header" | "path" | "cookie" #In
+Required := <BOOLEAN>
+Deprecated := <BOOLEAN>
+AllowEmptyValue := <BOOLEAN>
+Style := <STRING> ": " StyleValues
+Explode := <BOOLEAN>
+AllowReserved := <BOOLEAN>
+Schema := SchemaObj | ReferenceObj
+Example := <ANY>
+Examples := <IDENT> (ExampleObj | ReferenceObj)
+ExampleObj := [Summary Description Value ExternalValue] # 4.7.19 Example Object 
+Value := <ANY>
+# 4.7.12.3 Style Values
+StyleValues := Matrix | Labal | Form | Simple | SpaceDelimited | PipeDelimited | DeepObject
+Matrix := MatrixType MatrixIn
+Labal := LabalType LabalIn
+Form := FormType FormIn
+Simple := SimpleType SimpleIn
+SpaceDelimited := SpaceDelimitedType SpaceDelimitedIn
+PipeDelimited := PipeDelimitedType PipeDelimitedIn
+DeepObject := DeepObjectType DeepObjectIn
+MatrixType := "primitive", "array", "object"
+MatrixIn := "path"
+LabalType := "primitive", "array", "object"
+LabalIn := "path"
+FormType := "primitive", "array", "object"
+FormIn := "query", "cookie"
+SimpleType := "array"
+SimpleIn := "path", "header"
+SpaceDelimitedType := "array"
+SpaceDelimitedIn := "query"
+PipeDelimitedType := "array"
+PipeDelimitedIn := "query"
+DeepObjectType := "object"
+DeepObjectIn := "query"
 
-Paths := 
-Paths:  pathObject
-pathObject := 
-    "/{}"
+Nullable := <BOOLEAN>
+Discriminator := DiscriminatorObj
+ReadOnly := <BOOLEAN>
+WriteOnly := <BOOLEAN>
+Xml := XmlObj
+DiscriminatorObj := PropertyName Mapping? # 4.7.25 Discriminator Object 
+XmlObj := [Name NameSpace Prefix Attribate Wrapped] # 4.7.26 XML Object
+Mapping := <STRING> ":" <STRING> 
+NameSpace := Url
+Prefix := <STRING>
+Attribate := <BOOLEAN>
+Wrapped := <BOOLEAN>
 
-"/{"path = <IDENT> ::= [ "$ref" Summary Description Get Put Post Delete Options Head Patch Trace Servers Parameters ]
-Contact ::= [ Name Url email ]
-License ::= Name Url?
-VariableObj ::= [ Enum Default ] Description
-OperationObj ::= [ TagsForAPIDocControl Summary Description ExternalDocs OperationId Parameters RequestBody ] Responses [ Callbacks Deprecated SecurityRequirement Servers ]
-CallbackObj #이것도 정리 필요
-ParametersObj ::= Name locationOfParameter [ Description Required Deprecated AllowEmptyValue ] # Allow부분 재정의 필요 #이부분 제대로 파악 필요
-ReferenceObj ::= "$ref"
-RequestBodyObj ::= Description? Content Required?
-ResponseObj ::= Description [ Headers Content Links ]
-LinkObj ::= [ OperationRef OperationId LinkParameters LinkRequestBody Description Servers]
+# 4.7.7 Components Object
+Components := ComponentsObj *
+ComponentsObj := <IDENT> [Schemas Responses Parameters Examples RequestBodies Headers SecuritySchemes Links Callbacks]
+# 4.7.16 Responses Object 
+Responses := ResponsesObj
+ResponsesObj := ("default" | HTTPStatusCode) ResponsesType
+ResponsesType := (ResponseObj | ReferenceObj)*
+RequestBody := RequestBodyObj | ReferenceObj
 
-LinkParameters ::= ( <STRING> (<ANY> | "{expression}") )<MAP>
-LinkRequestBody ::= <ANY> | "{expression}"
+ResponseObj := Description (<IDENT> [Headers Content Links]) # 4.7.17 Response Object 
+Headers := HeaderObj | ReferenceObj
+Content := MediaTypeObj
+Links := LinkObj | ReferenceObj
+# 4.7.27 Security Scheme Object
+SecuritySchemes := SecuritySchemeObj
+SecuritySchemeObj := Type Description? Name In Scheme BearerFormat? Flows OpenldConnectUrl
+Flows := OAuthFlowsObj ApliesTo "ANY"
 
-SecurityScheme ::= SecurityType Description? Name LocationOfAPIKey NameOfTheHTTPAuthorizationScheme BearerFormat? OAuthFlows OpenIdConnectUrl #다시볼것
+# 4.7.28 OAuth Flows Object
+OAuthFlowsObj := [Implicit Password ClientCredentials AuthorizationCode]
+Implicit := OAuthFlowObj
+Password := OAuthFlowObj
+ClientCredentials := OAuthFlowObj
+AuthorizationCode := OAuthFlowObj
+# 4.7.29 OAuth Flow Object 
+OAuthFlowObj := AuthorizationUrl TokenUrl RefreshUrl? Scopes
+AuthorizationUrl := AuthorizationUrlType AuthorizationUrl
+TokenUrl := TokenUrlType TokenUrlApliesTo
+RefreshUrl := RefreshUrlType RefreshUrlApliesTo
+Scopes := ScopesType ScopesApliesTo
 
-MediaType ::= [ Schema Example Examples Encoding ]
+AuthorizationUrlType := <STRING>
+AuthorizationUrl := "oauth2 (implicit, authorizationCode)"
+TokenUrlType := <STRING>
+TokenUrlApliesTo := "oauth2 (password, clientCredentials, authorizationCode)"
+RefreshUrlType := <STRING>
+RefreshUrlApliesTo := "oauth2"
+ScopesType := <STRING> ":" <STRING>
+ScopesApliesTo := "oauth2"
+# 4.7.20 Link Object
+LinkObj := [OperationRef OperationId LinkParameters LinkRequestBody Description Server]
+OperationRef := <STRING>
+LinkParameters := <IDENT> (<ANY> | <EXPRESSION>)
+LinkRequestBody := <ANY> | <EXPRESSION>
+Server := ServerObj
+Callbacks := <EXPRESSION> PathItemObject # 4.7.18 Callback Object
 
-SchemaObj ::= [ Nullable Discriminator ReadOnly WriteOnly Xml ExternalDocs Example Deprecated ]
-ExampleObj ::= [ Summary Description Value ExternalValue ]
-EncodingObj ::= [ ContentType Headers Style Explode AllowReserved ]
-HeaderObj ::= [ Description Required Deprecated AllowEmptyValue ] #확실히 다시봐야할것
+HeaderObj := [Description Required Deprecated AllowEmptyValue Style Explode AllowReserved Schema Example Examples] # 4.7.21 Header Object
+MediaTypeObj := [Schema Example Examples Encoding] # 4.7.14 Media Type Object
+Encoding := <IDENT> EncodingObj # 4.7.15 Encoding Object 
+EncodingObj := [ContentType (<IDENT> Headers) Style Explode AllowReserved]
+ContentType := <STRING>
 
-Discriminator ::= PropertyName Mapping?
+RequestBodyObj := Description? Content Required? # 4.7.13 Request Body Object
 
-Xml ::= [Name NameSpace Prefix Attribate Wrapped]
-
-OAuthFlows ::= implicit #??????????????????????????
-
-Path ::= { "/" Name }
-Paths ::= 
-
-
-#Type
-OpenAPIVersion ::= <STRING>
-Title ::= <STRING>
-Description ::= <STRING>
-TermsOfService ::= Url
-Name ::= <STRING>
-Url ::= <STRING>
-Email ::= <STRING>
-Enum ::= <ARRAY>
-"$ref" ::= <STRING>
-Summary ::= <STRING>
-TagsForAPIDocControl ::= <STRING>
-ContentType ::= <STRING>
-Style ::=
-Explode ::= <BOOLEAN>
-AllowReserved ::= <BOOLEAN>
-LocationOfParameter ::= "query" | "header" | "path" | "cookie" #In
-LocationOfAPIKey ::= "query" | "header" | "cookie" #In
-Required ::= <BOOLEAN>
-Deprecated ::= <BOOLEAN>
-AllowEmptyValue
-OperationId
-Example ::= <ANY>
-ReadOnly ::= <BOOLEAN>
-WriteOnly ::= <BOOLEAN>
-propertyName ::= <STRING>
-SecurityType  ::= "apiKey" | "http" | "oauth2" | "openIdConnect" #Type
-OpenIdConnectUrl ::= Url
-
-
-
-
-#<BNF> [] : 있을수도 없을수도, () : 묶음, {} : 반복, 
-#<궁금한 점>  * :  , ?   ? :  , "" :  , '' :  ,type과 설명을 적는 방법
+# 4.7.30 Security Requirement Object
+SecurityRequirement := SecurityRequirementObj
+SecurityRequirementObj := <IDENT> ("array" <STRING>)
+# 4.7.22 Tag Object
+Tags := TagObj 
+TagObj := Name [Description ExternalDocs]
